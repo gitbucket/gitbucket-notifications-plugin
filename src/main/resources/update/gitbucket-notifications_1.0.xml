@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<changeSet>
+    <!--================================================================================================-->
+    <!-- ISSUE_NOTIFICATION -->
+    <!--================================================================================================-->
+    <createTable tableName="ISSUE_NOTIFICATION">
+        <column name="USER_NAME" type="varchar(100)" nullable="false"/>
+        <column name="REPOSITORY_NAME" type="varchar(100)" nullable="false"/>
+        <column name="ISSUE_ID" type="int" nullable="false"/>
+        <column name="NOTIFICATION_USER_NAME" type="varchar(100)" nullable="false"/>
+        <column name="SUBSCRIBED" type="boolean" nullable="false"/>
+    </createTable>
+
+    <addPrimaryKey constraintName="IDX_ISSUE_NOTIFICATION_PK" tableName="ISSUE_NOTIFICATION" columnNames="USER_NAME, REPOSITORY_NAME, ISSUE_ID, NOTIFICATION_USER_NAME"/>
+    <addForeignKeyConstraint constraintName="IDX_ISSUE_NOTIFICATION_FK0" baseTableName="ISSUE_NOTIFICATION" baseColumnNames="USER_NAME, REPOSITORY_NAME, ISSUE_ID" referencedTableName="ISSUE" referencedColumnNames="USER_NAME, REPOSITORY_NAME, ISSUE_ID"/>
+    <addForeignKeyConstraint constraintName="IDX_ISSUE_NOTIFICATION_FK1" baseTableName="ISSUE_NOTIFICATION" baseColumnNames="NOTIFICATION_USER_NAME" referencedTableName="ACCOUNT" referencedColumnNames="USER_NAME"/>
+
+    <!--================================================================================================-->
+    <!-- WATCH -->
+    <!--================================================================================================-->
+    <createTable tableName="WATCH">
+        <column name="USER_NAME" type="varchar(100)" nullable="false"/>
+        <column name="REPOSITORY_NAME" type="varchar(100)" nullable="false"/>
+        <column name="NOTIFICATION_USER_NAME" type="varchar(100)" nullable="false"/>
+        <column name="NOTIFICATION" type="varchar(20)" nullable="false"/>
+    </createTable>
+
+    <addPrimaryKey constraintName="IDX_WATCH_PK" tableName="WATCH" columnNames="USER_NAME, REPOSITORY_NAME, NOTIFICATION_USER_NAME"/>
+    <addForeignKeyConstraint constraintName="IDX_WATCH_FK0" baseTableName="WATCH" baseColumnNames="USER_NAME, REPOSITORY_NAME" referencedTableName="REPOSITORY" referencedColumnNames="USER_NAME, REPOSITORY_NAME"/>
+    <addForeignKeyConstraint constraintName="IDX_WATCH_FK1" baseTableName="WATCH" baseColumnNames="NOTIFICATION_USER_NAME" referencedTableName="ACCOUNT" referencedColumnNames="USER_NAME"/>
+
+</changeSet>
