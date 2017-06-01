@@ -3,7 +3,7 @@ package gitbucket.notifications.model
 trait WatchComponent { self: gitbucket.core.model.Profile =>
   import profile.api._
 
-  implicit val watchNotificationType = MappedColumnType.base[Watch.Notification, String](_.code, Watch.Notification.valueOf)
+  implicit val watchNotificationType = MappedColumnType.base[Watch.Notification, String](_.id, Watch.Notification.valueOf(_).get)
 
   lazy val Watches = TableQuery[Watches]
 
@@ -24,13 +24,13 @@ case class Watch(
 )
 
 object Watch {
-  abstract sealed class Notification(val code: String)
-  case object Watching extends Notification("watching")
-  case object NotWatching extends Notification("not_watching")
-  case object Ignoring extends Notification("ignoring")
+  abstract sealed class Notification(val id: String, val name: String)
+  case object Watching extends Notification("watching", "Watching")
+  case object NotWatching extends Notification("not_watching", "Not watching")
+  case object Ignoring extends Notification("ignoring", "Ignoring")
 
-  private[model] object Notification {
-    private val values: Seq[Notification] = Seq(Watching, NotWatching, Ignoring)
-    def valueOf(code: String): Notification = values.find(_.code == code).get
+  object Notification {
+    val values: Seq[Notification] = Seq(Watching, NotWatching, Ignoring)
+    def valueOf(id: String): Option[Notification] = values.find(_.id == id)
   }
 }

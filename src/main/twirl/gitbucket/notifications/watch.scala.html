@@ -1,0 +1,33 @@
+@(notification: gitbucket.notifications.model.Watch.Notification,
+  repository: gitbucket.core.service.RepositoryService.RepositoryInfo)(implicit context: gitbucket.core.controller.Context)
+@import gitbucket.core.view.helpers
+@gitbucket.core.html.main("Watch", Some(repository)){
+  @gitbucket.core.html.menu("watch", repository){
+
+    @gitbucket.core.helper.html.dropdown("Notifications"){
+      @gitbucket.notifications.model.Watch.Notification.values.map { n =>
+        <li>
+          <a href="#" class="watch" data-id="@n.id">
+            @gitbucket.core.helper.html.checkicon(notification.id == n.id) @n.name
+          </a>
+        </li>
+      }
+    }
+
+  }
+}
+<script>
+$(function(){
+  $('a.watch').click(function(){
+    var notification = $(this).data('id');
+    $.post('@helpers.url(repository)/watch',
+      { notification : notification },
+      function(){
+        $('a.watch i.octicon-check').removeClass('octicon-check');
+        $('a.watch[data-id=' + notification + '] i').addClass('octicon-check');
+      }
+    );
+    return false;
+  });
+});
+</script>

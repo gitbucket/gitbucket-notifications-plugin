@@ -12,3 +12,37 @@ trait NotificationsAccountHook extends AccountHook {
   }
 
 }
+
+trait NotificationsRepositoryHook extends RepositoryHook {
+
+  override def deleted(owner: String, repository: String)(implicit session: Session): Unit =  {
+    IssueNotifications.filter(t => t.userName === owner.bind && t.repositoryName === repository.bind).delete
+    Watches.filter(t => t.userName === owner.bind && t.repositoryName === repository.bind).delete
+  }
+
+  override def renamed(owner: String, repository: String, newRepository: String)(implicit session: Session): Unit = {
+    rename(owner, repository, owner, newRepository)
+  }
+
+  override def transferred(owner: String, newOwner: String, repository: String)(implicit session: Session): Unit = {
+    rename(owner, repository, newOwner, repository)
+  }
+
+  // TODO select - insert
+  private def rename(owner: String, repository: String, newOwner: String, newRepository: String)(implicit session: Session) = {
+    val n = IssueNotifications.filter(t => t.userName === owner.bind && t.repositoryName === repository.bind).list
+    val w = Watches.filter(t => t.userName === owner.bind && t.repositoryName === repository.bind).list
+
+    deleted(owner, repository)
+
+    IssueNotifications.insertAll(n.map(_.copy(userName = newOwner, repositoryName = newRepository)) :_*)
+    Watches.insertAll(w.map(_.copy(userName = newOwner, repositoryName = newRepository)) :_*)
+  }
+
+}
+
+trait NotificationsIssueHook extends IssueHook {
+
+
+
+}

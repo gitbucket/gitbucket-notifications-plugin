@@ -1,0 +1,34 @@
+@(subscribed: Boolean,
+  issue: gitbucket.core.model.Issue,
+  repository: gitbucket.core.service.RepositoryService.RepositoryInfo)
+@import gitbucket.core.view.helpers
+
+<hr/>
+<div style="margin-bottom: 14px;">
+  <span class="muted small strong">Notifications</span>
+  <div class="pull-right">
+    @if(subscribed){
+      <input type="button" class="btn btn-default issue-notification" value="Unsubscribe" data-subscribed="false" />
+    } else {
+      <input type="button" class="btn btn-default issue-notification" value="Subscribe" data-subscribed="true" />
+    }
+  </div>
+</div>
+<script>
+$(function(){
+  $('.issue-notification').click(function(){
+    var $this = $(this);
+    var subscribed = $this.data('subscribed');
+    $.post('@helpers.url(repository)/issues/@issue.issueId/notification,
+      { subscribed : subscribed },
+      function(){
+        if(subscribed == 'false'){
+          $this.val('Subscribe').data('subscribed', 'true');
+        } else {
+          $this.val('Unsubscribe').data('subscribed', 'false');
+        }
+      }
+    );
+  });
+});
+</script>
