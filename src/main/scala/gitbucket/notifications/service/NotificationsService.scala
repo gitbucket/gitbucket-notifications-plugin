@@ -1,9 +1,12 @@
 package gitbucket.notifications.service
 
+import gitbucket.core.model.Issue
+import gitbucket.core.service.{AccountService, IssuesService, RepositoryService}
 import gitbucket.notifications.model._, Profile._
 import profile.blockingApi._
 
 trait NotificationsService {
+  self: RepositoryService with AccountService with IssuesService =>
 
   def getWatch(owner: String, repository: String, userName: String)(implicit s: Session): Option[Watch] = {
     Watches
@@ -23,15 +26,6 @@ trait NotificationsService {
     )
   }
 
-  def getIssueNotification(owner: String, repository: String, issueId: Int, userName: String)(implicit s: Session): Option[IssueNotification] = {
-    IssueNotifications
-      .filter { t =>
-        t.userName === owner.bind && t.repositoryName === repository.bind &&
-          t.issueId === issueId.bind && t.notificationUserName === userName.bind
-      }
-      .firstOption
-  }
-
   def updateIssueNotification(owner: String, repository: String, issueId: Int, userName: String, subscribed: Boolean)(implicit s: Session): Unit = {
     IssueNotifications
       .filter { t =>
@@ -46,6 +40,48 @@ trait NotificationsService {
       notificationUserName = userName,
       subscribed           = subscribed
     )
+  }
+
+  def autoSubscribeUsersForRepository(owner: String, repository: String)(implicit s: Session): List[String] = {
+    // individual repository's owner
+    owner ::
+    // group members of group repository
+    getGroupMembers(owner).map(_.userName) :::
+    // collaborators
+    getCollaboratorUserNames(owner, repository)
+  }
+
+  def getNotificationUsers(issue: Issue)(implicit s: Session): List[String] = {
+    val watches = Watches.filter(t =>
+      t.userName === issue.userName.bind && t.repositoryName === issue.repositoryName.bind
+    ).list
+    val notifications = IssueNotifications.filter(t =>
+      t.userName === issue.userName.bind && t.repositoryName === issue.repositoryName.bind && t.issueId === issue.issueId.bind
+    ).list
+
+    (
+      Seq(
+        // auto-subscribe users for repository
+        autoSubscribeUsersForRepository(issue.userName, issue.repositoryName) :::
+        // watching users
+        watches.withFilter(_.notification == Watch.Watching).map(_.notificationUserName),
+        // participants
+        issue.openedUserName ::
+        getComments(issue.userName, issue.repositoryName, issue.issueId).map(_.commentedUserName),
+        // subscribers
+        notifications.withFilter(_.subscribed).map(_.notificationUserName)
+      ) zip Seq(
+        // not watching users
+        watches.withFilter(_.notification == Watch.NotWatching).map(_.notificationUserName),
+        // ignoring users
+        watches.withFilter(_.notification == Watch.Ignoring).map(_.notificationUserName),
+        // unsubscribers
+        notifications.withFilter(!_.subscribed).map(_.notificationUserName)
+      )
+    ).foldLeft[List[String]](Nil){ case (res, (add, remove)) =>
+      (add ++ res) diff remove
+    }.distinct
+
   }
 
 }

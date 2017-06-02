@@ -1,36 +1,29 @@
 import gitbucket.core.controller.Context
 import gitbucket.core.model.Issue
-import gitbucket.core.plugin._
+import gitbucket.core.plugin.Link
 import gitbucket.core.service.RepositoryService.RepositoryInfo
+import gitbucket.notifications.service._
 import io.github.gitbucket.solidbase.migration.LiquibaseMigration
 import io.github.gitbucket.solidbase.model.Version
 
 class Plugin extends gitbucket.core.plugin.Plugin {
 
-  override val pluginId: String = "notifications"
+  override val pluginId = "notifications"
 
-  override val pluginName: String = "Notifications Plugin"
+  override val pluginName = "Notifications Plugin"
 
-  override val description: String = "Provides Notifications feature on GitBucket."
+  override val description = "Provides Notifications feature on GitBucket."
 
-  override val versions: List[Version] = List(
+  override val versions = List(
     new Version("1.0.0",
       new LiquibaseMigration("update/gitbucket-notifications_1.0.xml")
     )
   )
 
-
-  override val accountHooks: Seq[AccountHook] = Seq(
-  )
-
-  override val repositoryHooks: Seq[RepositoryHook] = Seq(
-  )
-
-  override val issueHooks: Seq[IssueHook] = Seq(
-  )
-
-  override val pullRequestHooks: Seq[PullRequestHook] = Seq(
-  )
+  override val accountHooks     = Seq(new AccountHook)
+  override val repositoryHooks  = Seq(new RepositoryHook)
+  override val issueHooks       = Seq(new IssueHook)
+  override val pullRequestHooks = Seq(new PullRequestHook)
 
   override val repositoryMenus = Seq(
     (repository: RepositoryInfo, context: Context) =>
