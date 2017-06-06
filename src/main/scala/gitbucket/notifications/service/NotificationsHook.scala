@@ -2,8 +2,8 @@ package gitbucket.notifications.service
 
 import gitbucket.core.controller.Context
 import gitbucket.core.model.{Account, Issue}
-import gitbucket.core.service.RepositoryService.RepositoryInfo
-import gitbucket.core.util.Notifier
+import gitbucket.core.service._, RepositoryService.RepositoryInfo
+import gitbucket.core.util.{LDAPUtil, Notifier}
 import gitbucket.core.view.Markdown
 import gitbucket.notifications.model.Profile._
 import profile.blockingApi._
@@ -46,7 +46,11 @@ class RepositoryHook extends gitbucket.core.plugin.RepositoryHook {
 
 }
 
-class IssueHook extends gitbucket.core.plugin.IssueHook {
+class IssueHook extends gitbucket.core.plugin.IssueHook
+  with NotificationsService
+  with RepositoryService
+  with AccountService
+  with IssuesService {
 
   override def created(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
     Notifier().toNotify(
@@ -89,11 +93,10 @@ class IssueHook extends gitbucket.core.plugin.IssueHook {
   }
 
 
-  protected val subject: (Issue, RepositoryInfo) => String =
-    (issue, r) => s"[${r.owner}/${r.name}] ${issue.title} (#${issue.issueId})"
+  protected def subject(issue: Issue, r: RepositoryInfo): String = s"[${r.owner}/${r.name}] ${issue.title} (#${issue.issueId})"
 
-  protected val message: (String, RepositoryInfo) => (String => String) => String =
-    (content, r) => msg => msg(Markdown.toHtml(
+  protected def message(content: String, r: RepositoryInfo)(msg: String => String)(implicit context: Context): String =
+    msg(Markdown.toHtml(
       markdown         = content,
       repository       = r,
       enableWikiLink   = false,
@@ -102,10 +105,16 @@ class IssueHook extends gitbucket.core.plugin.IssueHook {
       enableLineBreaks = false
     ))
 
-  // TODO
   protected val recipients: Issue => Account => Session => Seq[String] = {
     issue => loginAccount => implicit session =>
-      Seq("")
+      getNotificationUsers(issue)
+        .withFilter ( _ != loginAccount.userName )  // the operation in person is excluded
+        .flatMap (
+          getAccountByUserName(_)
+            .filterNot (_.isGroupAccount)
+            .filterNot (LDAPUtil.isDummyMailAddress)
+            .map (_.mailAddress)
+        )
   }
 
 }

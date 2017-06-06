@@ -1,6 +1,6 @@
 @(subscribed: Boolean,
   issue: gitbucket.core.model.Issue,
-  repository: gitbucket.core.service.RepositoryService.RepositoryInfo)
+  repository: gitbucket.core.service.RepositoryService.RepositoryInfo)(implicit context: gitbucket.core.controller.Context)
 @import gitbucket.core.view.helpers
 
 <hr/>
@@ -19,7 +19,7 @@ $(function(){
   $('.issue-notification').click(function(){
     var $this = $(this);
     var subscribed = $this.data('subscribed');
-    $.post('@helpers.url(repository)/issues/@issue.issueId/notification,
+    $.post('@helpers.url(repository)/issues/@issue.issueId/notification',
       { subscribed : subscribed },
       function(){
         if(subscribed == 'false'){

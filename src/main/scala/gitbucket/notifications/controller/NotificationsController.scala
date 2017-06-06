@@ -34,12 +34,15 @@ trait NotificationsControllerBase extends ControllerBase {
     } getOrElse NotFound()
   })
 
-  // TODO check exist issue
   ajaxPost("/:owner/:repository/issues/:id/notification")(readableUsersOnly { repository =>
-    params.getAs[Boolean]("subscribed").map { subscribed =>
-      updateIssueNotification(repository.owner, repository.name, params("id").toInt, context.loginAccount.get.userName, subscribed)
-      Ok()
-    } getOrElse NotFound()
+    defining(repository.owner, repository.name) { case (owner, name) =>
+      getIssue(owner, name, params("id")).flatMap { issue =>
+        params.getAs[Boolean]("subscribed").map { subscribed =>
+          updateIssueNotification(owner, name, issue.issueId, context.loginAccount.get.userName, subscribed)
+          Ok()
+        }
+      } getOrElse NotFound()
+    }
   })
 
 }
