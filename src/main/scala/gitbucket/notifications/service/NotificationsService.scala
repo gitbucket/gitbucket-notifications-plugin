@@ -79,8 +79,8 @@ trait NotificationsService {
         notifications.withFilter(!_.subscribed).map(_.notificationUserName)
       )
     ).foldLeft[List[String]](Nil){ case (res, (add, remove)) =>
-      (add ++ res) diff remove
-    }.distinct
+      (add ++ res).distinct diff remove
+    }
 
   }
 

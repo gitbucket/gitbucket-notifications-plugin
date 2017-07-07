@@ -14,18 +14,27 @@
     }
   </div>
 </div>
+<span id="label-issue-notification">
+  @if(subscribed){
+    <span class="muted small">You’re receiving notifications.</span>
+  } else {
+    <span class="muted small">You’re not receiving notifications.</span>
+  }
+</span>
 <script>
 $(function(){
   $('.issue-notification').click(function(){
     var $this = $(this);
     var subscribed = $this.data('subscribed');
     $.post('@helpers.url(repository)/issues/@issue.issueId/notification',
-      { subscribed : subscribed },
+      { 'subscribed' : subscribed },
       function(){
         if(subscribed == 'false'){
           $this.val('Subscribe').data('subscribed', 'true');
+          $('#label-issue-notification').html($('<span class="muted small">').text('You’re not receiving notifications.'));
         } else {
           $this.val('Unsubscribe').data('subscribed', 'false');
+          $('#label-issue-notification').html($('<span class="muted small">').text('You’re receiving notifications.'));
         }
       }
     );

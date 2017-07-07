@@ -3,8 +3,7 @@ import gitbucket.core.model.Issue
 import gitbucket.core.plugin.Link
 import gitbucket.core.service.RepositoryService.RepositoryInfo
 import gitbucket.core.util.Implicits.request2Session
-import gitbucket.notifications.controller._
-import gitbucket.notifications.service._
+import gitbucket.notifications._
 import io.github.gitbucket.solidbase.migration.LiquibaseMigration
 import io.github.gitbucket.solidbase.model.Version
 
@@ -23,13 +22,13 @@ class Plugin extends gitbucket.core.plugin.Plugin {
   )
 
   override val controllers = Seq(
-    "/*" -> new NotificationsController()
+    "/*" -> new controller.NotificationsController()
   )
 
-  override val accountHooks     = Seq(new AccountHook)
-  override val repositoryHooks  = Seq(new RepositoryHook)
-  override val issueHooks       = Seq(new IssueHook)
-  override val pullRequestHooks = Seq(new PullRequestHook)
+  override val accountHooks     = Seq(new service.AccountHook)
+  override val repositoryHooks  = Seq(new service.RepositoryHook)
+  override val issueHooks       = Seq(new service.IssueHook)
+  override val pullRequestHooks = Seq(new service.PullRequestHook)
 
   override val repositoryMenus = Seq(
     (repository: RepositoryInfo, context: Context) =>
@@ -46,8 +45,8 @@ class Plugin extends gitbucket.core.plugin.Plugin {
       context.loginAccount map { account =>
         implicit val session = request2Session(context.request)
 
-        gitbucket.notifications.html.issue(
-          gitbucket.notifications.view.helpers.getNotificationUsers(issue).contains(account.userName),
+        html.issue(
+          view.helpers.getNotificationUsers(issue).contains(account.userName),
           issue,
           repository)(context)
       }
