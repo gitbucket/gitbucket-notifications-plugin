@@ -1,19 +1,13 @@
 @(notification: gitbucket.notifications.model.Watch.Notification,
   repository: gitbucket.core.service.RepositoryService.RepositoryInfo)(implicit context: gitbucket.core.controller.Context)
 @import gitbucket.core.view.helpers
-@gitbucket.core.html.main("Watch", Some(repository)){
-  @gitbucket.core.html.menu("watch", repository){
-
-    @gitbucket.core.helper.html.dropdown("Notifications"){
-      @gitbucket.notifications.model.Watch.Notification.values.map { n =>
-        <li>
-          <a href="#" class="watch" data-id="@n.id">
-            @gitbucket.core.helper.html.checkicon(notification.id == n.id) @n.name
-          </a>
-        </li>
-      }
-    }
-
+@gitbucket.core.helper.html.dropdown("Notifications"){
+  @gitbucket.notifications.model.Watch.Notification.values.map { n =>
+    <li>
+      <a href="#" class="watch" data-id="@n.id">
+        @gitbucket.core.helper.html.checkicon(notification.id == n.id) @n.name
+      </a>
+    </li>
   }
 }
 <script>
