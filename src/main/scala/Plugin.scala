@@ -1,16 +1,13 @@
 import gitbucket.core.controller.Context
 import gitbucket.core.model.Issue
-import gitbucket.core.service.{AccountService, IssuesService, RepositoryService}
 import gitbucket.core.service.RepositoryService.RepositoryInfo
 import gitbucket.core.util.Implicits.request2Session
 import gitbucket.notifications._
 import gitbucket.notifications.model.Watch
-import gitbucket.notifications.service.NotificationsService
 import io.github.gitbucket.solidbase.migration.LiquibaseMigration
 import io.github.gitbucket.solidbase.model.Version
 
-class Plugin extends gitbucket.core.plugin.Plugin
-  with NotificationsService with RepositoryService with AccountService with IssuesService {
+class Plugin extends gitbucket.core.plugin.Plugin {
 
   override val pluginId = "notifications"
 
@@ -38,8 +35,12 @@ class Plugin extends gitbucket.core.plugin.Plugin
       context.loginAccount.map { loginAccount =>
         implicit val session = request2Session(context.request)
 
-        html.watch(getWatch(repository.owner, repository.name, loginAccount.userName).map(_.notification) getOrElse {
-          if (autoSubscribeUsersForRepository(repository.owner, repository.name) contains loginAccount.userName) Watch.Watching else Watch.NotWatching
+        val owner = repository.owner
+        val name  = repository.name
+        val userName = loginAccount.userName
+
+        html.watch(view.helpers.getWatch(owner, name, userName).map(_.notification) getOrElse {
+          if (view.helpers.autoSubscribeUsersForRepository(owner, name) contains userName) Watch.Watching else Watch.NotWatching
         }, repository)(context)
       }
     }
