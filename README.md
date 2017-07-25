@@ -1,7 +1,5 @@
 # gitbucket-notifications-plugin
 
-**This plug-in is still experimental.**
-
 This plug-in provides notifications feature on GitBucket.
 
 Plugin version | GitBucket version
