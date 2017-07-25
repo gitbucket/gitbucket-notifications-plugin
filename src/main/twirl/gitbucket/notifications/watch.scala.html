@@ -1,11 +1,13 @@
 @(notification: gitbucket.notifications.model.Watch.Notification,
   repository: gitbucket.core.service.RepositoryService.RepositoryInfo)(implicit context: gitbucket.core.controller.Context)
 @import gitbucket.core.view.helpers
-@gitbucket.core.helper.html.dropdown("Notifications"){
+@gitbucket.core.helper.html.dropdown(value = notification.name, right = true){
   @gitbucket.notifications.model.Watch.Notification.values.map { n =>
     <li>
       <a href="#" class="watch" data-id="@n.id">
-        @gitbucket.core.helper.html.checkicon(notification.id == n.id) @n.name
+        @gitbucket.core.helper.html.checkicon(notification.id == n.id)
+        <span class="notification-label strong">@n.name</span>
+        <div class="muted small">@n.description</div>
       </a>
     </li>
   }
@@ -13,12 +15,17 @@
 <script>
 $(function(){
   $('a.watch').click(function(){
-    var notification = $(this).data('id');
+    var selected = $(this);
+    var notification = selected.data('id');
     $.post('@helpers.url(repository)/watch',
       { notification : notification },
       function(){
         $('a.watch i.octicon-check').removeClass('octicon-check');
         $('a.watch[data-id=' + notification + '] i').addClass('octicon-check');
+
+        // Update button label
+        var label = selected.find('span.notification-label').text().trim();
+        selected.parents('div.btn-group').find('button>span.strong').text(label);
       }
     );
     return false;

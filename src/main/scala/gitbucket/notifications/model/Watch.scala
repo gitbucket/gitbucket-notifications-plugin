@@ -24,10 +24,10 @@ case class Watch(
 )
 
 object Watch {
-  abstract sealed class Notification(val id: String, val name: String)
-  case object Watching extends Notification("watching", "Watching")
-  case object NotWatching extends Notification("not_watching", "Not watching")
-  case object Ignoring extends Notification("ignoring", "Ignoring")
+  abstract sealed class Notification(val id: String, val name: String, val description: String)
+  case object Watching extends Notification("watching", "Watching", "Notify all conversations.")
+  case object NotWatching extends Notification("not_watching", "Not watching", "Notify when participating.")
+  case object Ignoring extends Notification("ignoring", "Ignoring", "Never notify.")
 
   object Notification {
     val values: Seq[Notification] = Seq(Watching, NotWatching, Ignoring)
