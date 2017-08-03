@@ -3,17 +3,19 @@ package gitbucket.notifications.controller
 import gitbucket.core.controller.ControllerBase
 import gitbucket.core.service.{AccountService, IssuesService, RepositoryService}
 import gitbucket.core.util.Implicits._
-import gitbucket.core.util.ReadableUsersAuthenticator
+import gitbucket.core.util.{OneselfAuthenticator, ReadableUsersAuthenticator}
 import gitbucket.core.util.SyntaxSugars._
 import gitbucket.notifications.model.Watch
 import gitbucket.notifications.service.NotificationsService
 import org.scalatra.Ok
 
 class NotificationsController extends NotificationsControllerBase
-  with NotificationsService with RepositoryService with AccountService with IssuesService with ReadableUsersAuthenticator
+  with NotificationsService with RepositoryService with AccountService with IssuesService
+  with ReadableUsersAuthenticator with OneselfAuthenticator
 
 trait NotificationsControllerBase extends ControllerBase {
-  self: NotificationsService with RepositoryService with AccountService with IssuesService with ReadableUsersAuthenticator =>
+  self: NotificationsService with RepositoryService with AccountService with IssuesService
+    with ReadableUsersAuthenticator with OneselfAuthenticator =>
 
   ajaxPost("/:owner/:repository/watch")(readableUsersOnly { repository =>
     params.get("notification").flatMap(Watch.Notification.valueOf).map { notification =>
@@ -31,6 +33,13 @@ trait NotificationsControllerBase extends ControllerBase {
         }
       } getOrElse NotFound()
     }
+  })
+
+  get("/:userName/_notifications")(oneselfOnly {
+    val userName = params("userName")
+    getAccountByUserName(userName).map { account =>
+      gitbucket.notifications.html.settings(disableEmail(account.userName))
+    } getOrElse NotFound()
   })
 
 }

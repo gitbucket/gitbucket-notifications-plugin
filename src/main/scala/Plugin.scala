@@ -1,5 +1,6 @@
 import gitbucket.core.controller.Context
 import gitbucket.core.model.Issue
+import gitbucket.core.plugin.Link
 import gitbucket.core.service.RepositoryService.RepositoryInfo
 import gitbucket.core.util.Implicits.request2Session
 import gitbucket.notifications._
@@ -18,6 +19,9 @@ class Plugin extends gitbucket.core.plugin.Plugin {
   override val versions = List(
     new Version("1.0.0",
       new LiquibaseMigration("update/gitbucket-notifications_1.0.xml")
+    ),
+    new Version("1.1.0",
+      new LiquibaseMigration("update/gitbucket-notifications_1.1.xml")
     )
   )
 
@@ -55,6 +59,17 @@ class Plugin extends gitbucket.core.plugin.Plugin {
           view.helpers.getNotificationUsers(issue).contains(account.userName),
           issue,
           repository)(context)
+      }
+  )
+
+  override val accountSettingMenus = Seq(
+    (context: Context) =>
+      context.loginAccount map { account =>
+        Link(
+          id    = "notifications",
+          label = "Notifications",
+          path  = s"/${account.userName}/_notifications"
+        )
       }
   )
 

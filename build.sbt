@@ -1,8 +1,8 @@
 name := "gitbucket-notifications-plugin"
 
 organization := "io.github.gitbucket"
-version := "1.0.0"
-scalaVersion := "2.12.2"
+version := "1.1.0"
+scalaVersion := "2.12.3"
 
 lazy val root = (project in file(".")).enablePlugins(SbtTwirl)
 

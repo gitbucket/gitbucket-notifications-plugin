@@ -42,6 +42,10 @@ trait NotificationsService {
     )
   }
 
+  def disableEmail(userName: String)(implicit s: Session): Boolean = {
+    NotificationsAccounts.filter(_.userName === userName.bind).firstOption.exists(_.disableEmail)
+  }
+
   def autoSubscribeUsersForRepository(owner: String, repository: String)(implicit s: Session): List[String] = {
     // individual repository's owner
     owner ::

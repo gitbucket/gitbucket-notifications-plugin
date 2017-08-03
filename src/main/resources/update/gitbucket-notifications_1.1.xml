@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<changeSet>
+    <!--================================================================================================-->
+    <!-- NOTIFICATIONS_ACCOUNT -->
+    <!--================================================================================================-->
+    <createTable tableName="NOTIFICATIONS_ACCOUNT">
+        <column name="USER_NAME" type="varchar(100)" nullable="false"/>
+        <column name="DISABLE_EMAIL" type="boolean" nullable="false"/>
+    </createTable>
+
+    <addPrimaryKey constraintName="IDX_NOTIFICATIONS_ACCOUNT_PK" tableName="NOTIFICATIONS_ACCOUNT" columnNames="USER_NAME"/>
+    <addForeignKeyConstraint constraintName="IDX_NOTIFICATIONS_ACCOUNT_FK0" baseTableName="NOTIFICATIONS_ACCOUNT" baseColumnNames="USER_NAME" referencedTableName="ACCOUNT" referencedColumnNames="USER_NAME"/>
+
+</changeSet>
