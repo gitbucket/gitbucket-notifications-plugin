@@ -53,57 +53,55 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
   with IssuesService {
 
   override def created(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
-    Notifier().toNotify(
-      subject(issue, r),
-      message(issue.content getOrElse "", r)(content => s"""
-        |$content<br/>
-        |--<br/>
-        |<a href="${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"}">View it on GitBucket</a>
-        """.stripMargin)
-    )(recipients(issue))
+    val markdown =
+      s"""|${issue.content getOrElse ""}
+          |
+          |----
+          |[View it on GitBucket](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"})
+          |""".stripMargin
+
+    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
   }
 
   override def addedComment(commentId: Int, content: String, issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
-    Notifier().toNotify(
-      subject(issue, r),
-      message(content, r)(content => s"""
-        |$content<br/>
-        |--<br/>
-        |<a href="${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}#comment-$commentId"}">View it on GitBucket</a>
-        """.stripMargin)
-    )(recipients(issue))
+    val markdown =
+      s"""|${toHtml(content, r)}
+          |
+          |----
+          |[View it on GitBucket](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}#comment-$commentId"})
+          |""".stripMargin
+
+    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
   }
 
   override def closed(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
-    Notifier().toNotify(
-      subject(issue, r),
-      message("close", r)(content => s"""
-        |$content <a href="${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"}">#${issue.issueId}</a>
-        """.stripMargin)
-    )(recipients(issue))
+    val markdown =
+      s"""|close #[${issue.issueId}](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"})
+          |""".stripMargin
+
+    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
   }
 
   override def reopened(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
-    Notifier().toNotify(
-      subject(issue, r),
-      message("reopen", r)(content => s"""
-        |$content <a href="${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"}">#${issue.issueId}</a>
-        """.stripMargin)
-    )(recipients(issue))
+    val markdown =
+      s"""|reopen #[${issue.issueId}](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"})
+          |""".stripMargin
+
+    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
   }
 
 
   protected def subject(issue: Issue, r: RepositoryInfo): String = s"[${r.owner}/${r.name}] ${issue.title} (#${issue.issueId})"
 
-  protected def message(content: String, r: RepositoryInfo)(msg: String => String)(implicit context: Context): String =
-    msg(Markdown.toHtml(
-      markdown         = content,
+  protected def toHtml(markdown: String, r: RepositoryInfo)(implicit context: Context): String =
+    Markdown.toHtml(
+      markdown         = markdown,
       repository       = r,
       enableWikiLink   = false,
       enableRefsLink   = true,
       enableAnchor     = false,
       enableLineBreaks = false
-    ))
+    )
 
   protected val recipients: Issue => Account => Session => Seq[String] = {
     issue => loginAccount => implicit session =>
@@ -122,35 +120,34 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
 class PullRequestHook extends IssueHook with gitbucket.core.plugin.PullRequestHook {
 
   override def created(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
-    val url = s"${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}"
-    Notifier().toNotify(
-      subject(issue, r),
-      message(issue.content getOrElse "", r)(content => s"""
-        |$content<hr/>
-        |View, comment on, or merge it at:<br/>
-        |<a href="$url">$url</a>
-        """.stripMargin)
-    )(recipients(issue))
+    val markdown =
+      s"""|${issue.content getOrElse ""}
+          |
+          |----
+          |View, comment on, or merge it at:
+          |${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}
+          |""".stripMargin
+
+    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
   }
 
   override def addedComment(commentId: Int, content: String, issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
-    Notifier().toNotify(
-      subject(issue, r),
-      message(content, r)(content => s"""
-        |$content<br/>
-        |--<br/>
-        |<a href="${s"${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}#comment-$commentId"}">View it on GitBucket</a>
-        """.stripMargin)
-    )(recipients(issue))
+    val markdown =
+      s"""|$content
+          |
+          |----
+          |[View it on GitBucket](${s"${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}#comment-$commentId"})
+          |""".stripMargin
+
+    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
   }
 
   override def merged(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
-    Notifier().toNotify(
-      subject(issue, r),
-      message("merge", r)(content => s"""
-        |$content <a href="${s"${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}"}">#${issue.issueId}</a>
-        """.stripMargin)
-    )(recipients(issue))
+    val markdown =
+      s"""|merge #[${issue.issueId}](${s"${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}"})
+          |""".stripMargin
+
+    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
   }
 
 }
