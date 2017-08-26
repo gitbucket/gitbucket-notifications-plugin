@@ -65,7 +65,7 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
 
   override def addedComment(commentId: Int, content: String, issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
     val markdown =
-      s"""|${toHtml(content, r)}
+      s"""|${content}
           |
           |----
           |[View it on GitBucket](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}#comment-$commentId"})
