@@ -18,7 +18,8 @@ class Plugin extends gitbucket.core.plugin.Plugin {
   override val versions = List(
     new Version("1.0.0",
       new LiquibaseMigration("update/gitbucket-notifications_1.0.xml")
-    )
+    ),
+    new Version("1.1.0")
   )
 
   override val controllers = Seq(
