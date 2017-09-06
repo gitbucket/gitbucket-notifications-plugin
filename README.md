@@ -1,4 +1,4 @@
-# gitbucket-notifications-plugin
+# gitbucket-notifications-plugin [![Build Status](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin.svg)](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin)
 
 This plug-in provides notifications feature on GitBucket.
 
