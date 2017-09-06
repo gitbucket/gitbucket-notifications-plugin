@@ -1,14 +1,18 @@
-name := "gitbucket-notifications-plugin"
+val Organization = "io.github.gitbucket"
+val ProjectName = "gitbucket-notifications-plugin"
+val ProjectVersion = "1.1.0"
+val GitBucketVersion = Option(System.getProperty("gitbucket.version")).getOrElse("4.16.0")
 
-organization := "io.github.gitbucket"
-version := "1.1.0"
+name := ProjectName
+organization := Organization
+version := ProjectVersion
 scalaVersion := "2.12.2"
 
 lazy val root = (project in file(".")).enablePlugins(SbtTwirl)
 
 libraryDependencies ++= Seq(
-  "io.github.gitbucket" %% "gitbucket"         % "4.16.0" % "provided",
-  "javax.servlet"        % "javax.servlet-api" % "3.1.0"  % "provided"
+  "io.github.gitbucket" %% "gitbucket"         % GitBucketVersion % "provided",
+  "javax.servlet"        % "javax.servlet-api" % "3.1.0"          % "provided"
 )
 
 scalacOptions ++= Seq("-feature", "-deprecation")
