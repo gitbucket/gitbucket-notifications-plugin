@@ -2,11 +2,17 @@ package gitbucket.notifications.service
 
 import gitbucket.core.controller.Context
 import gitbucket.core.model.{Account, Issue}
-import gitbucket.core.service._, RepositoryService.RepositoryInfo
-import gitbucket.core.util.{LDAPUtil, Notifier}
+import gitbucket.core.service._
+import RepositoryService.RepositoryInfo
+import gitbucket.core.util.{LDAPUtil, Mailer}
 import gitbucket.core.view.Markdown
 import gitbucket.notifications.model.Profile._
+import org.slf4j.LoggerFactory
 import profile.blockingApi._
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Success, Failure}
 
 
 class AccountHook extends gitbucket.core.plugin.AccountHook {
@@ -52,7 +58,9 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
   with AccountService
   with IssuesService {
 
-  override def created(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
+  private val logger = LoggerFactory.getLogger(classOf[IssueHook])
+
+  override def created(issue: Issue, r: RepositoryInfo)(implicit session: Session, context: Context): Unit = {
     val markdown =
       s"""|${issue.content getOrElse ""}
           |
@@ -60,10 +68,11 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
           |[View it on GitBucket](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"})
           |""".stripMargin
 
-    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
+    sendAsync(issue, r, subject(issue, r), markdown)
   }
 
-  override def addedComment(commentId: Int, content: String, issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
+  override def addedComment(commentId: Int, content: String, issue: Issue, r: RepositoryInfo)
+                           (implicit session: Session, context: Context): Unit = {
     val markdown =
       s"""|${content}
           |
@@ -71,27 +80,29 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
           |[View it on GitBucket](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}#comment-$commentId"})
           |""".stripMargin
 
-    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
+    sendAsync(issue, r, subject(issue, r), markdown)
   }
 
-  override def closed(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
+  override def closed(issue: Issue, r: RepositoryInfo)(implicit session: Session, context: Context): Unit = {
     val markdown =
       s"""|close #[${issue.issueId}](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"})
           |""".stripMargin
 
-    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
+    sendAsync(issue, r, subject(issue, r), markdown)
   }
 
-  override def reopened(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
+  override def reopened(issue: Issue, r: RepositoryInfo)(implicit session: Session, context: Context): Unit = {
     val markdown =
       s"""|reopen #[${issue.issueId}](${s"${context.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"})
           |""".stripMargin
 
-    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
+    sendAsync(issue, r, subject(issue, r), markdown)
   }
 
 
-  protected def subject(issue: Issue, r: RepositoryInfo): String = s"[${r.owner}/${r.name}] ${issue.title} (#${issue.issueId})"
+  protected def subject(issue: Issue, r: RepositoryInfo): String = {
+    s"[${r.owner}/${r.name}] ${issue.title} (#${issue.issueId})"
+  }
 
   protected def toHtml(markdown: String, r: RepositoryInfo)(implicit context: Context): String =
     Markdown.toHtml(
@@ -103,23 +114,38 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
       enableLineBreaks = false
     )
 
-  protected val recipients: Issue => Account => Session => Seq[String] = {
-    issue => loginAccount => implicit session =>
-      getNotificationUsers(issue)
-        .withFilter ( _ != loginAccount.userName )  // the operation in person is excluded
-        .flatMap (
-          getAccountByUserName(_)
-            .filterNot (_.isGroupAccount)
-            .filterNot (LDAPUtil.isDummyMailAddress)
-            .map (_.mailAddress)
-        )
+  protected def sendAsync(issue: Issue, repository: RepositoryInfo, subject: String, markdown: String)
+                         (implicit session: Session, context: Context): Unit = {
+    val recipients = getRecipients(issue, context.loginAccount.get)
+    val mailer = new Mailer(context.settings)
+    val f = Future {
+      recipients.foreach { address =>
+        mailer.send(address, subject, markdown, Some(toHtml(markdown, repository)), context.loginAccount)
+      }
+      "Notifications Successful."
+    }
+    f.onComplete {
+      case Success(s) => logger.debug(s)
+      case Failure(t) => logger.error("Notifications Failed.", t)
+    }
+  }
+
+  protected def getRecipients(issue: Issue, loginAccount: Account)(implicit session: Session): Seq[String] = {
+    getNotificationUsers(issue)
+      .withFilter ( _ != loginAccount.userName )  // the operation in person is excluded
+      .flatMap (
+      getAccountByUserName(_)
+        .filterNot (_.isGroupAccount)
+        .filterNot (LDAPUtil.isDummyMailAddress)
+        .map (_.mailAddress)
+    )
   }
 
 }
 
 class PullRequestHook extends IssueHook with gitbucket.core.plugin.PullRequestHook {
 
-  override def created(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
+  override def created(issue: Issue, r: RepositoryInfo)(implicit session: Session, context: Context): Unit = {
     val markdown =
       s"""|${issue.content getOrElse ""}
           |
@@ -128,10 +154,11 @@ class PullRequestHook extends IssueHook with gitbucket.core.plugin.PullRequestHo
           |${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}
           |""".stripMargin
 
-    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
+    sendAsync(issue, r, subject(issue, r), markdown)
   }
 
-  override def addedComment(commentId: Int, content: String, issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
+  override def addedComment(commentId: Int, content: String, issue: Issue, r: RepositoryInfo)
+                           (implicit session: Session, context: Context): Unit = {
     val markdown =
       s"""|$content
           |
@@ -139,15 +166,15 @@ class PullRequestHook extends IssueHook with gitbucket.core.plugin.PullRequestHo
           |[View it on GitBucket](${s"${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}#comment-$commentId"})
           |""".stripMargin
 
-    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
+    sendAsync(issue, r, subject(issue, r), markdown)
   }
 
-  override def merged(issue: Issue, r: RepositoryInfo)(implicit context: Context): Unit = {
+  override def merged(issue: Issue, r: RepositoryInfo)(implicit session: Session, context: Context): Unit = {
     val markdown =
       s"""|merge #[${issue.issueId}](${s"${context.baseUrl}/${r.owner}/${r.name}/pull/${issue.issueId}"})
           |""".stripMargin
 
-    Notifier().toNotify(subject(issue, r), markdown, Some(toHtml(markdown, r)))(recipients(issue))
+    sendAsync(issue, r, subject(issue, r), markdown)
   }
 
 }
