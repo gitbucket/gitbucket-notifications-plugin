@@ -1,7 +1,7 @@
 val Organization = "io.github.gitbucket"
 val ProjectName = "gitbucket-notifications-plugin"
 val ProjectVersion = "1.2.0"
-val GitBucketVersion = Option(System.getProperty("gitbucket.version")).getOrElse("4.17.0-SNAPSHOT")
+val GitBucketVersion = Option(System.getProperty("gitbucket.version")).getOrElse("4.17.0")
 
 name := ProjectName
 organization := Organization
