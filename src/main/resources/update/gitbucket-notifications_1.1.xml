@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<changeSet>
+    <dropForeignKeyConstraint constraintName="IDX_ISSUE_NOTIFICATION_FK0" baseTableName="ISSUE_NOTIFICATION" />
+    <dropForeignKeyConstraint constraintName="IDX_ISSUE_NOTIFICATION_FK1" baseTableName="ISSUE_NOTIFICATION" />
+    <dropForeignKeyConstraint constraintName="IDX_WATCH_FK0" baseTableName="WATCH" />
+    <dropForeignKeyConstraint constraintName="IDX_WATCH_FK1" baseTableName="WATCH" />
+</changeSet>
