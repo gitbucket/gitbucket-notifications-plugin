@@ -38,7 +38,15 @@ trait NotificationsControllerBase extends ControllerBase {
   get("/:userName/_notifications")(oneselfOnly {
     val userName = params("userName")
     getAccountByUserName(userName).map { account =>
-      gitbucket.notifications.html.settings(disableEmail(account.userName))
+      gitbucket.notifications.html.settings(account, isDisableEmailNotification(account))
+    } getOrElse NotFound()
+  })
+
+  post("/:userName/_notifications")(oneselfOnly {
+    val userName = params("userName")
+    params.getAs[Boolean]("disable").map { disable =>
+      updateEmailNotification(userName, disable)
+      redirect(s"/${userName}/_notifications")
     } getOrElse NotFound()
   })
 

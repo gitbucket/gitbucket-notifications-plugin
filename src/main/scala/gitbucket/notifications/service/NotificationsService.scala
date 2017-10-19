@@ -1,6 +1,6 @@
 package gitbucket.notifications.service
 
-import gitbucket.core.model.Issue
+import gitbucket.core.model.{Account, Issue}
 import gitbucket.core.service.{AccountService, IssuesService, RepositoryService}
 import gitbucket.notifications.model._, Profile._
 import profile.blockingApi._
@@ -42,8 +42,13 @@ trait NotificationsService {
     )
   }
 
-  def disableEmail(userName: String)(implicit s: Session): Boolean = {
-    NotificationsAccounts.filter(_.userName === userName.bind).firstOption.exists(_.disableEmail)
+  def isDisableEmailNotification(account: Account)(implicit s: Session): Boolean = {
+    NotificationsAccounts.filter(_.userName === account.userName.bind).firstOption.exists(_.disableEmail)
+  }
+
+  def updateEmailNotification(userName: String, disable: Boolean)(implicit s: Session): Unit = {
+    NotificationsAccounts.filter(_.userName === userName.bind).delete
+    if (disable) NotificationsAccounts insert NotificationsAccount(userName = userName, disableEmail = true)
   }
 
   def autoSubscribeUsersForRepository(owner: String, repository: String)(implicit s: Session): List[String] = {
