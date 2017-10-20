@@ -1,26 +1,25 @@
 @(account: gitbucket.core.model.Account,
-  disableEmail: Boolean)(implicit context: gitbucket.core.controller.Context)
-
+  disableEmail: Boolean, info: Option[Any])(implicit context: gitbucket.core.controller.Context)
+@import gitbucket.core.view.helpers
 @gitbucket.core.html.main("Notifications"){
   @gitbucket.core.account.html.menu("notifications", account.userName, account.isGroupAccount){
-    <div class="panel panel-default">
-      <div class="panel-heading strong">Email notification preferences</div>
-      <div class="panel-body">
-        <fieldset class="form-group">
-          <p class="muted">If checked, never be notified of anything.</p>
-          <label for="disable">
-            <input type="checkbox" name="disable" id="disable" value="true" @if(disableEmail){checked}/>
-            Disable
-          </label>
-        </fieldset>
+    @gitbucket.core.helper.html.information(info)
+    <form action="@helpers.url(account.userName)/_notifications" method="POST">
+      <div class="panel panel-default">
+        <div class="panel-heading strong">Email notification preferences</div>
+        <div class="panel-body">
+          <fieldset class="form-group">
+            <label for="disable" class="checkbox">
+              <input type="checkbox" name="disable" id="disable" value="true" @if(disableEmail){checked}/>
+              Disable
+              <div class="normal muted">If checked, never be notified of anything.</div>
+            </label>
+          </fieldset>
+        </div>
       </div>
-    </div>
+      <div>
+        <input type="submit" class="btn btn-success" value="Save">
+      </div>
+    </form>
   }
 }
-<script>
-$(function(){
-  $('#disable').click(function(){
-    $.post('@context.path/@account.userName/_notifications', { 'disable': this.checked });
-  });
-});
-</script>
