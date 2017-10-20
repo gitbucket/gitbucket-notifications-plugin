@@ -3,20 +3,24 @@
 
 @gitbucket.core.html.main("Notifications"){
   @gitbucket.core.account.html.menu("notifications", account.userName, account.isGroupAccount){
-    <form method="POST" action="@context.path/@account.userName/_notifications">
-      <div class="panel panel-default">
-        <div class="panel-heading strong">Email notification preferences</div>
-        <div class="panel-body">
-          <fieldset class="form-group">
-            <p class="muted">If checked, never be notified of anything.</p>
-            <label for="disable">
-              <input type="checkbox" name="disable" id="disable" value="true" @if(disableEmail){checked}/>
-              Disable
-            </label>
-          </fieldset>
-          <input type="submit" class="btn btn-success" value="Save"/>
-        </div>
+    <div class="panel panel-default">
+      <div class="panel-heading strong">Email notification preferences</div>
+      <div class="panel-body">
+        <fieldset class="form-group">
+          <p class="muted">If checked, never be notified of anything.</p>
+          <label for="disable">
+            <input type="checkbox" name="disable" id="disable" value="true" @if(disableEmail){checked}/>
+            Disable
+          </label>
+        </fieldset>
       </div>
-    </form>
+    </div>
   }
 }
+<script>
+$(function(){
+  $('#disable').click(function(){
+    $.post('@context.path/@account.userName/_notifications', { 'disable': this.checked });
+  });
+});
+</script>

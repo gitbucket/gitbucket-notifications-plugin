@@ -42,11 +42,11 @@ trait NotificationsControllerBase extends ControllerBase {
     } getOrElse NotFound()
   })
 
-  post("/:userName/_notifications")(oneselfOnly {
+  ajaxPost("/:userName/_notifications")(oneselfOnly {
     val userName = params("userName")
     params.getAs[Boolean]("disable").map { disable =>
       updateEmailNotification(userName, disable)
-      redirect(s"/${userName}/_notifications")
+      Ok()
     } getOrElse NotFound()
   })
 

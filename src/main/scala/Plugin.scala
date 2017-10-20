@@ -72,7 +72,7 @@ class Plugin extends gitbucket.core.plugin.Plugin {
         Link(
           id    = "notifications",
           label = "Notifications",
-          path  = s"/${account.userName}/_notifications"
+          path  = s"${account.userName}/_notifications"
         )
       }
   )
