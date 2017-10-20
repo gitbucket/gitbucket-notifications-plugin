@@ -1,12 +1,12 @@
 val Organization = "io.github.gitbucket"
 val ProjectName = "gitbucket-notifications-plugin"
 val ProjectVersion = "1.3.0"
-val GitBucketVersion = Option(System.getProperty("gitbucket.version")).getOrElse("4.17.0")
+val GitBucketVersion = Option(System.getProperty("gitbucket.version")).getOrElse("4.18.0")
 
 name := ProjectName
 organization := Organization
 version := ProjectVersion
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.4"
 
 lazy val root = (project in file(".")).enablePlugins(SbtTwirl)
 
