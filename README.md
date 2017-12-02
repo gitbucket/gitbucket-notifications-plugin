@@ -48,3 +48,7 @@ If you won't receive any notifications, you select Ignoring.
 ### Subscribing to issues
 
 You can subscribe or unsubscribe to individual issues.
+
+## Build from source
+
+Run `sbt assembly` and copy generated `/target/scala-2.12/gitbucket-notifications-plugin-assembply-x.x.x.jar` to `~/.gitbucket/plugins/` (If the directory does not exist, create it by hand before copying the jar), or just run `sbt install`.
