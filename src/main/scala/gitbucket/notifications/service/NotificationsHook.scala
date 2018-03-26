@@ -56,7 +56,10 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
   with NotificationsService
   with RepositoryService
   with AccountService
-  with IssuesService {
+  with IssuesService
+  with LabelsService
+  with PrioritiesService
+  with MilestonesService {
 
   private val logger = LoggerFactory.getLogger(classOf[IssueHook])
 

@@ -1,7 +1,7 @@
 package gitbucket.notifications.controller
 
 import gitbucket.core.controller.ControllerBase
-import gitbucket.core.service.{AccountService, IssuesService, RepositoryService}
+import gitbucket.core.service._
 import gitbucket.core.util.Implicits._
 import gitbucket.core.util.{OneselfAuthenticator, ReadableUsersAuthenticator}
 import gitbucket.core.util.SyntaxSugars._
@@ -10,7 +10,8 @@ import gitbucket.notifications.service.NotificationsService
 import org.scalatra.Ok
 
 class NotificationsController extends NotificationsControllerBase
-  with NotificationsService with RepositoryService with AccountService with IssuesService
+  with NotificationsService with RepositoryService with AccountService
+  with IssuesService with LabelsService with PrioritiesService with MilestonesService
   with ReadableUsersAuthenticator with OneselfAuthenticator
 
 trait NotificationsControllerBase extends ControllerBase {
