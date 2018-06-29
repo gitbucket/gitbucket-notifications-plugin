@@ -4,6 +4,8 @@ import gitbucket.core.controller.Context
 import gitbucket.core.model.{Account, Issue}
 import gitbucket.core.service._
 import RepositoryService.RepositoryInfo
+import gitbucket.core
+import gitbucket.core.model
 import gitbucket.core.util.{LDAPUtil, Mailer}
 import gitbucket.core.view.Markdown
 import gitbucket.notifications.model.Profile._
@@ -12,7 +14,7 @@ import profile.blockingApi._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
 
 class AccountHook extends gitbucket.core.plugin.AccountHook {
@@ -59,7 +61,8 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
   with IssuesService
   with LabelsService
   with PrioritiesService
-  with MilestonesService {
+  with MilestonesService
+  with SystemSettingsService {
 
   private val logger = LoggerFactory.getLogger(classOf[IssueHook])
 
@@ -102,6 +105,24 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
     sendAsync(issue, r, subject(issue, r), markdown)
   }
 
+  override def assigned(issue: Issue, r: RepositoryInfo, assigner: Option[String], assigned: Option[String], oldAssigned: Option[String])(implicit session: model.Profile.profile.api.Session, context: Context): Unit = {
+    val assignerMessage = assigner.flatMap(getAccountByUserName(_)).map(a => s"${a.fullName}(@${a.userName})").getOrElse("unknown user")
+    val assignedMessage = assigned.flatMap(getAccountByUserName(_)).map(a => s"${a.fullName}(@${a.userName})").getOrElse("not assigned")
+    val oldAssignedMessage = oldAssigned.flatMap(getAccountByUserName(_, true)).map(a => s"${a.fullName}(@${a.userName})").getOrElse("not assigned")
+    val markdown =
+      s"""assigned from ${oldAssignedMessage} to ${assignedMessage} by ${assignerMessage}
+         |""".stripMargin
+    sendAsync(issue, r, subject(issue, r), markdown)
+  }
+
+  override def closedByCommitComment(issue: Issue, r: RepositoryInfo, commitMessage: String, pusher: Account)(implicit session: core.model.Profile.profile.api.Session): Unit = {
+    val settings = loadSystemSettings()
+    val message = s"""|close #[${issue.issueId}](${s"${settings.baseUrl}/${r.owner}/${r.name}/issues/${issue.issueId}"})
+        |
+        |${commitMessage}""".stripMargin
+    println(message)
+    sendAsyncTextOnly(issue, r, subject(issue, r), message, pusher, settings)
+  }
 
   protected def subject(issue: Issue, r: RepositoryInfo): String = {
     s"[${r.owner}/${r.name}] ${issue.title} (#${issue.issueId})"
@@ -116,6 +137,21 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
       enableAnchor     = false,
       enableLineBreaks = false
     )
+
+  protected def sendAsyncTextOnly(issue: Issue, repository: RepositoryInfo, subject: String, message: String, senderAccount: Account, settings: SystemSettingsService.SystemSettings)(implicit session:Session): Unit = {
+    val recipients = getRecipients(issue, senderAccount)
+    val mailer = new Mailer(settings)
+    val f = Future {
+      recipients.foreach { address =>
+        mailer.send(address, subject, message, None, Some(senderAccount))
+      }
+      "Notifications Successful."
+    }
+    f.onComplete {
+      case Success(s) => logger.debug(s)
+      case Failure(t) => logger.error("Notifications Failed.", t)
+    }
+  }
 
   protected def sendAsync(issue: Issue, repository: RepositoryInfo, subject: String, markdown: String)
                          (implicit session: Session, context: Context): Unit = {
