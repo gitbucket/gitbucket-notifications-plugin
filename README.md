@@ -4,6 +4,7 @@ This plug-in provides notifications feature on GitBucket.
 
 Plugin version | GitBucket version
 :--------------|:--------------------
+1.7.x          | 4.30.x
 1.6.x          | 4.26.x
 1.5.x          | 4.23.x - 4.25.x
 1.4.x          | 4.19.x - 4.22.x

@@ -132,6 +132,7 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
     Markdown.toHtml(
       markdown         = markdown,
       repository       = r,
+      branch           = r.repository.defaultBranch,
       enableWikiLink   = false,
       enableRefsLink   = true,
       enableAnchor     = false,
