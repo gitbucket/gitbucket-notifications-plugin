@@ -158,9 +158,10 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
                          (implicit session: Session, context: Context): Unit = {
     val recipients = getRecipients(issue, context.loginAccount.get)
     val mailer = new Mailer(context.settings)
+    val html = toHtml(markdown, repository)
     val f = Future {
       recipients.foreach { address =>
-        mailer.send(address, subject, markdown, Some(toHtml(markdown, repository)), context.loginAccount)
+        mailer.send(address, subject, markdown, Some(html), context.loginAccount)
       }
       "Notifications Successful."
     }
