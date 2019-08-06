@@ -1,5 +1,5 @@
 name := "gitbucket-notifications-plugin"
 organization := "io.github.gitbucket"
-version := "1.7.1"
-scalaVersion := "2.12.7"
-gitbucketVersion := "4.30.0"
+version := "1.8.0"
+scalaVersion := "2.13.0"
+gitbucketVersion := "4.32.0"
