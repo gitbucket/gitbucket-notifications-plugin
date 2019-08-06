@@ -1,4 +1,4 @@
-# gitbucket-notifications-plugin [![Build Status](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin.svg)](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin) [![GitBucket Plugins](https://plugins.gitbucket-community.org/badge/gitbucket-notifications-plugin/latest.svg)](https://plugins.gitbucket-community.org/repos/gitbucket-notifications-plugin)
+# gitbucket-notifications-plugin [![Build Status](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin.svg)](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin)
 
 This plug-in provides notifications feature on GitBucket.
 
@@ -55,4 +55,4 @@ You can subscribe or unsubscribe to individual issues.
 
 ## Build from source
 
-Run `sbt assembly` and copy generated `/target/scala-2.12/gitbucket-notifications-plugin-assembply-x.x.x.jar` to `~/.gitbucket/plugins/` (If the directory does not exist, create it by hand before copying the jar), or just run `sbt install`.
+Run `sbt assembly` and copy generated `/target/scala-2.13/gitbucket-notifications-plugin-x.x.x.jar` to `~/.gitbucket/plugins/` (If the directory does not exist, create it by hand before copying the jar), or just run `sbt install`.
