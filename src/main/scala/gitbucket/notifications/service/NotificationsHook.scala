@@ -179,8 +179,12 @@ class IssueHook extends gitbucket.core.plugin.IssueHook
         .filterNot (_.isGroupAccount)
         .filterNot (LDAPUtil.isDummyMailAddress)
         .filterNot (isDisableEmailNotification)
-        .map (_.mailAddress)
-    )
+        .map (account =>
+          account.mailAddress :: getAccountExtraMailAddresses(account.userName)
+        )
+      )
+      .flatten
+      .distinct
   }
 
 }
