@@ -1,4 +1,4 @@
-# gitbucket-notifications-plugin [![Build Status](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin.svg)](https://travis-ci.org/gitbucket/gitbucket-notifications-plugin)
+# gitbucket-notifications-plugin [![build](https://github.com/gitbucket/gitbucket-notifications-plugin/workflows/build/badge.svg?branch=master)](https://github.com/gitbucket/gitbucket-notifications-plugin/actions?query=workflow%3Abuild+branch%3Amaster)
 
 This plug-in provides notifications feature on GitBucket.
 
