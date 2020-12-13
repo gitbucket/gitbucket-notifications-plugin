@@ -11,7 +11,7 @@ trait IssueNotificationComponent { self: gitbucket.core.model.Profile =>
     val issueId              = column[Int]("ISSUE_ID")
     val notificationUserName = column[String]("NOTIFICATION_USER_NAME")
     val subscribed           = column[Boolean]("SUBSCRIBED")
-    def * = (userName, repositoryName, issueId, notificationUserName, subscribed) <> (IssueNotification.tupled, IssueNotification.unapply)
+    def * = (userName, repositoryName, issueId, notificationUserName, subscribed).<>(IssueNotification.tupled, IssueNotification.unapply)
   }
 }
 

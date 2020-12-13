@@ -8,7 +8,7 @@ trait NotificationsAccountComponent { self: gitbucket.core.model.Profile =>
   class NotificationsAccounts(tag: Tag) extends Table[NotificationsAccount](tag, "NOTIFICATIONS_ACCOUNT") {
     val userName     = column[String]("USER_NAME")
     val disableEmail = column[Boolean]("DISABLE_EMAIL")
-    def * = (userName, disableEmail) <> (NotificationsAccount.tupled, NotificationsAccount.unapply)
+    def * = (userName, disableEmail).<>(NotificationsAccount.tupled, NotificationsAccount.unapply)
   }
 }
 

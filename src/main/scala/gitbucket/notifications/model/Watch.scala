@@ -12,7 +12,7 @@ trait WatchComponent { self: gitbucket.core.model.Profile =>
     val repositoryName       = column[String]("REPOSITORY_NAME")
     val notificationUserName = column[String]("NOTIFICATION_USER_NAME")
     val notification         = column[Watch.Notification]("NOTIFICATION")
-    def * = (userName, repositoryName, notificationUserName, notification) <> ((Watch.apply _).tupled, Watch.unapply)
+    def * = (userName, repositoryName, notificationUserName, notification).<>((Watch.apply _).tupled, Watch.unapply)
   }
 }
 
