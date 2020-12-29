@@ -1,5 +1,5 @@
 name := "gitbucket-notifications-plugin"
 organization := "io.github.gitbucket"
-version := "1.9.0"
+version := "1.10.0"
 scalaVersion := "2.13.3"
 gitbucketVersion := "4.35.0"
