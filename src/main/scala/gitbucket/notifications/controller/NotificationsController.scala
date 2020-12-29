@@ -47,7 +47,7 @@ trait NotificationsControllerBase extends ControllerBase {
     val userName = params("userName")
     val disable = params.getAs[Boolean]("disable").getOrElse(false)
     updateEmailNotification(userName, disable)
-    flash += "info" -> "Notification setting has been updated."
+    flash.update("info", "Notification setting has been updated.")
     redirect(s"/${userName}/_notifications")
   })
 
