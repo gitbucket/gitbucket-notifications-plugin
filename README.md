@@ -1,4 +1,4 @@
-# gitbucket-notifications-plugin [![build](https://github.com/gitbucket/gitbucket-notifications-plugin/workflows/build/badge.svg?branch=master)](https://github.com/gitbucket/gitbucket-notifications-plugin/actions?query=workflow%3Abuild+branch%3Amaster)
+# gitbucket-notifications-plugin [![build](https://github.com/gitbucket/gitbucket-notifications-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/gitbucket/gitbucket-notifications-plugin/actions/workflows/build.yml)
 
 This plug-in provides notifications feature on GitBucket.
 
