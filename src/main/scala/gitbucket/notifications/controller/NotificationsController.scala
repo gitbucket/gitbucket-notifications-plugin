@@ -4,7 +4,6 @@ import gitbucket.core.controller.ControllerBase
 import gitbucket.core.service._
 import gitbucket.core.util.Implicits._
 import gitbucket.core.util.{OneselfAuthenticator, ReadableUsersAuthenticator}
-import gitbucket.core.util.SyntaxSugars._
 import gitbucket.notifications.model.Watch
 import gitbucket.notifications.service.NotificationsService
 import org.scalatra.Ok
@@ -26,14 +25,12 @@ trait NotificationsControllerBase extends ControllerBase {
   })
 
   ajaxPost("/:owner/:repository/issues/:id/notification")(readableUsersOnly { repository =>
-    defining(repository.owner, repository.name) { case (owner, name) =>
-      getIssue(owner, name, params("id")).flatMap { issue =>
-        params.getAs[Boolean]("subscribed").map { subscribed =>
-          updateIssueNotification(owner, name, issue.issueId, context.loginAccount.get.userName, subscribed)
-          Ok()
-        }
-      } getOrElse NotFound()
-    }
+    getIssue(repository.owner, repository.name, params("id")).flatMap { issue =>
+      params.getAs[Boolean]("subscribed").map { subscribed =>
+        updateIssueNotification(repository.owner, repository.name, issue.issueId, context.loginAccount.get.userName, subscribed)
+        Ok()
+      }
+    } getOrElse NotFound()
   })
 
   get("/:userName/_notifications")(oneselfOnly {
